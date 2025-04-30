@@ -91,7 +91,25 @@ def root():
 
 @app.get("/activities")
 def get_activities():
-    return activities
+    # Count the number of activities each student is enrolled in
+    student_activity_count = {}
+    for activity in activities.values():
+        for participant in activity["participants"]:
+            student_activity_count[participant] = student_activity_count.get(participant, 0) + 1
+
+    # Add an asterisk next to students enrolled in multiple activities
+    activities_with_marks = {}
+    for activity_name, activity in activities.items():
+        updated_participants = [
+            f"{participant}*" if student_activity_count[participant] > 1 else participant
+            for participant in activity["participants"]
+        ]
+        activities_with_marks[activity_name] = {
+            **activity,
+            "participants": updated_participants
+        }
+
+    return activities_with_marks
 
 
 @app.post("/activities/{activity_name}/signup")
